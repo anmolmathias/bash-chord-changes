@@ -1,10 +1,13 @@
 #! /bin/bash
 
-while getopts c:t: flag
+counter=1
+
+while getopts c:t:p: flag
 do
 	case $flag in
 		c) chords=($OPTARG);;
 		t) time=${OPTARG};;
+		p) pause=${OPTARG};;
 	esac
 done
 
@@ -13,33 +16,37 @@ then
 	time=60
 fi
 
-get_chord () {
+if [[ -z "$pause" ]]
+then
+	pause=2
+fi
+
+gen_chord () {
 	current_chord=${chords[$((RANDOM%${#chords[@]}))]}
 }
 
-check_dup () {
+set_chord () {
+	gen_chord
 	if [[ $current_chord = $previous_chord ]] 
 	then
 		for chord in ${chords[@]} 
 		do
-			get_chord
-			if [[ $chord != $previous_chord ]]
+			gen_chord
+			if [[ $current_chord != $previous_chord ]]
 			then
-				current_chord=$chord
 				previous_chord=$current_chord
 				break
 			fi
 		done
-else
-	previous_chord=$current_chord
+	else
+		previous_chord=$current_chord
 	fi	
 }
 
-echo ""
-echo "Practicing ${#chords[@]} chords for $time cycles"
-get_chord 
+gen_chord 
 previous_chord=$current_chord
-counter=1
+echo ""
+echo "Practicing ${#chords[@]} chords at intervals of $pause seconds for $time cycles"
 echo "Get ready."
 echo " "
 sleep 1
@@ -52,12 +59,12 @@ echo " "
 
 while [ $counter -le $time ]
 do
-	sleep 2
-	get_chord
-	check_dup
+	sleep $pause
+	set_chord
 	echo "$current_chord"
 	echo " "
 	((counter++))
 done
+
 sleep 1
 echo "ALL DONE"
