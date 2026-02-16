@@ -8,12 +8,18 @@ do
 	esac
 done
 
+if [[ -z "$time" ]]
+then
+	time=60
+fi
+
 get_chord () {
 	current_chord=${chords[$((RANDOM%${#chords[@]}))]}
 }
 
 check_dup () {
-	if [[ $current_chord = $previous_chord ]]; then
+	if [[ $current_chord = $previous_chord ]] 
+	then
 		for chord in ${chords[@]} 
 		do
 			get_chord
